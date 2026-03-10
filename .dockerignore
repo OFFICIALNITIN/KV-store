@@ -1,0 +1,4 @@
+kv-server
+*.exe
+.git
+.gitignore
