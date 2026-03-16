@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"net/http"
 	"time"
 
 	config "github.com/OFFICIALNITIN/KV-store"
 	"github.com/OFFICIALNITIN/KV-store/internal/server"
 	"github.com/OFFICIALNITIN/KV-store/internal/store"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 func main() {
@@ -27,6 +29,13 @@ func main() {
 
 	log.Printf("Info: TCP listener started on %s", addr)
 	log.Println("Concurrency model: Goroutine per connection")
+
+	go func() {
+		metricAddr := fmt.Sprintf(":%d", cfg.Server.MetricsPort)
+		http.Handle("/metrics", promhttp.Handler())
+		log.Printf("Info: Metrics available at http://localhost:%d/metrics", cfg.Server.MetricsPort)
+		http.ListenAndServe(metricAddr, nil)
+	}()
 
 	for {
 		conn, err := listener.Accept()

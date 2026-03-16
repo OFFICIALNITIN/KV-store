@@ -8,8 +8,9 @@ import (
 
 type Config struct {
 	Server struct {
-		Host string `yaml:"host"`
-		Port int    `yaml:"port"`
+		Host        string `yaml:"host"`
+		Port        int    `yaml:"port"`
+		MetricsPort int    `yaml:"metrics_port"`
 	} `yaml:"server"`
 	Storage struct {
 		CleanupInterval int `yaml:"cleanup_interval_seconds"`

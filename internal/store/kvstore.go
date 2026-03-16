@@ -35,6 +35,9 @@ func (s *KVStore) Set(key string, value any, ttl time.Duration) {
 		Value:      value,
 		Expiration: expiration,
 	}
+
+	setTotalOps.Inc()
+	activeKeys.Inc()
 }
 
 func (s *KVStore) Get(key string) (any, bool) {
@@ -45,6 +48,8 @@ func (s *KVStore) Get(key string) (any, bool) {
 	if !found || item.Expired() {
 		return nil, false
 	}
+
+	getTotalOps.Inc()
 
 	return item.Value, true
 }
@@ -59,6 +64,9 @@ func (s *KVStore) Delete(key string) bool {
 	}
 
 	delete(s.items, key)
+
+	deleteTotalOps.Inc()
+	activeKeys.Dec()
 	return true
 }
 
@@ -70,6 +78,8 @@ func (s *KVStore) DeleteExpired() {
 	for k, v := range s.items {
 		if v.Expiration > 0 && now > v.Expiration {
 			delete(s.items, k)
+			expiredKeysTotal.Inc()
+			activeKeys.Dec()
 		}
 	}
 }
