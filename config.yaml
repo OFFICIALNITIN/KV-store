@@ -2,6 +2,7 @@ server:
   host: 0.0.0.0
   port: 6379
   metrics_port: 2112
+  http_port: 8080
 
 storage:
   cleanup_interval_seconds: 60

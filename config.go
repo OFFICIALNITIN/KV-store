@@ -11,6 +11,7 @@ type Config struct {
 		Host        string `yaml:"host"`
 		Port        int    `yaml:"port"`
 		MetricsPort int    `yaml:"metrics_port"`
+		HTTPPort    int    `yaml:"http_port"`
 	} `yaml:"server"`
 	Storage struct {
 		CleanupInterval int `yaml:"cleanup_interval_seconds"`

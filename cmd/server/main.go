@@ -37,6 +37,17 @@ func main() {
 		http.ListenAndServe(metricAddr, nil)
 	}()
 
+	go func() {
+		httpAddr := fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.HTTPPort)
+		mux := http.NewServeMux()
+		mux.Handle("/keys/", server.NewHTTPHandler(kv))
+
+		log.Printf("Info: HTTP API listing on %s", httpAddr)
+		if err := http.ListenAndServe(httpAddr, mux); err != nil {
+			log.Printf("HTTP server error: %v", err)
+		}
+	}()
+
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
