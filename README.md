@@ -1,6 +1,6 @@
 # 🗄️ KV-Store
 
-A lightweight, Redis-like **in-memory Key-Value store** written in Go. It communicates over raw TCP, supports TTL-based key expiration, and is fully configurable via a YAML file.
+A lightweight, Redis-like **in-memory Key-Value store** written in Go. It communicates over raw TCP and a RESTful HTTP API, supports TTL-based key expiration, and is fully configurable via a YAML file.
 
 ---
 
@@ -10,6 +10,7 @@ A lightweight, Redis-like **in-memory Key-Value store** written in Go. It commun
 - ⏱️ **TTL (Time-To-Live)** support — keys auto-expire
 - 🔄 **Automatic janitor** that cleans up expired keys in the background
 - 🌐 **TCP server** — connect with any TCP client (e.g. `netcat`, `telnet`)
+- 🚀 **RESTful HTTP API** — intuitive JSON-based API for programmatic access
 - 🐳 **Docker-ready** — run anywhere with a single command
 - ⚙️ **YAML config** — no recompile needed to change host/port/cleanup settings
 - 🔒 **Concurrency-safe** using `sync.RWMutex`
@@ -25,7 +26,8 @@ KV-store/
 │       └── main.go          # Entry point
 ├── internal/
 │   ├── server/
-│   │   └── tcp.go           # TCP connection handler
+│   │   ├── tcp.go           # TCP connection handler
+│   │   └── http.go          # HTTP API handler
 │   └── store/
 │       └── kvstore.go       # Core KV store logic
 ├── config.go                # Config loader (YAML → struct)
@@ -47,6 +49,8 @@ Edit `config.yaml` to configure the server — **no recompile needed**:
 server:
   host: 0.0.0.0   # Listen on all interfaces
   port: 6379       # TCP port
+  metrics_port: 2112  # Prometheus metrics port
+  http_port: 8080     # HTTP API port
 
 storage:
   cleanup_interval_seconds: 60   # How often to delete expired keys
@@ -153,6 +157,41 @@ DELETE name
 OK
 
 EXIT
+```
+
+---
+
+## 🌐 HTTP API
+
+The KV-store now features a robust HTTP interface for easy programmatic access.
+
+### Endpoints
+
+| Method   | Endpoint          | Description                                   |
+|----------|-------------------|-----------------------------------------------|
+| `GET`    | `/keys/{key}`     | Retrieve the value associated with `{key}`    |
+| `PUT`    | `/keys/{key}`     | Create or update a key-value pair             |
+| `DELETE` | `/keys/{key}`     | Delete a key-value pair                       |
+
+### Examples
+
+**Store a Key-Value Pair:**
+```bash
+curl -X PUT http://localhost:8080/keys/name \
+     -H "Content-Type: application/json" \
+     -d '{"Value": "nitin"}'
+```
+
+**Retrieve a Value:**
+```bash
+curl http://localhost:8080/keys/name
+# Response: {"key":"name","value":"nitin"}
+```
+
+**Delete a Key:**
+```bash
+curl -X DELETE http://localhost:8080/keys/name
+# Response: {"status": "deleted"}
 ```
 
 ---

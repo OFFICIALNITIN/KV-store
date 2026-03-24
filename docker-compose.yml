@@ -4,7 +4,9 @@ services:
   kv-store:
     build: .
     ports:
-      - "6379:6379"
+      - "6379:6379" # TCP
+      - "8080:8080" # HTTP API
+      - "2112:2112" # Metrics
     volumes:
       - ./config.yaml:/app/config.yaml
     restart: unless-stopped

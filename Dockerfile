@@ -16,6 +16,6 @@ WORKDIR /app
 COPY --from=builder /app/kv-server .
 COPY --from=builder /app/config.yaml .
 
-EXPOSE 6379
+EXPOSE 6379 8080 2112
 
 CMD ["./kv-server"]

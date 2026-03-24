@@ -48,8 +48,10 @@ func (h *HTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 
 		h.kv.Set(key, req.Value, 0)
+
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{"status": "ok"}`))
+		w.Write([]byte(`{"status": "ok"}` + "\n"))
 
 	case http.MethodDelete:
 		deleted := h.kv.Delete(key)
@@ -58,8 +60,9 @@ func (h *HTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{"status": "deleted"}`))
+		w.Write([]byte(`{"status": "deleted"}` + "\n"))
 
 	default:
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
