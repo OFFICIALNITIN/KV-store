@@ -5,6 +5,9 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	config "github.com/OFFICIALNITIN/KV-store"
@@ -17,6 +20,14 @@ func main() {
 	cfg, _ := config.LoadConfig("config.yaml")
 
 	kv := store.New(time.Duration(cfg.Storage.CleanupInterval) * time.Second)
+
+	if cfg.Storage.SnapshotFile != "" {
+		if err := kv.LoadSnapshot(cfg.Storage.SnapshotFile); err != nil {
+			log.Printf("Warning: Failed to load snapshot: %v", err)
+		} else {
+			log.Println("Info: Successfully loaded data from snapshot!")
+		}
+	}
 
 	addr := fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port)
 
@@ -48,13 +59,32 @@ func main() {
 		}
 	}()
 
-	for {
-		conn, err := listener.Accept()
-		if err != nil {
-			log.Printf("Connection error: %v", err)
-			continue
+	go func() {
+		for {
+			conn, err := listener.Accept()
+			if err != nil {
+				if opErr, ok := err.(*net.OpError); ok && opErr.Err.Error() == "use of closed network connection" {
+					break
+				}
+				log.Printf("Connection error: %v", err)
+				continue
+			}
+			go server.HandleConnection(conn, kv)
 		}
+	}()
 
-		go server.HandleConnection(conn, kv)
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
+
+	<-quit
+	log.Println("\nInfo: Shutting down server gracefully...")
+
+	if cfg.Storage.SnapshotFile != "" {
+		log.Println("Info: Saving memory snapshot to disk...")
+		if err := kv.SaveSnapshot(cfg.Storage.SnapshotFile); err != nil {
+			log.Printf("Error saving snapshot: %v", err)
+		} else {
+			log.Println("Info: Snapshot saved successfully!")
+		}
 	}
 }

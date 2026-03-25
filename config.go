@@ -14,8 +14,10 @@ type Config struct {
 		HTTPPort    int    `yaml:"http_port"`
 	} `yaml:"server"`
 	Storage struct {
-		CleanupInterval int `yaml:"cleanup_interval_seconds"`
-		MaxMemoryMB     int `yaml:"max_memory_mb"`
+		CleanupInterval  int    `yaml:"cleanup_interval_seconds"`
+		MaxMemoryMB      int    `yaml:"max_memory_mb"`
+		SnapshotFile     string `yaml:"snapshot_file"`
+		SnapshotInterval int    `yaml:"snapshot_interval_seconds"`
 	} `yaml:"storage"`
 }
 

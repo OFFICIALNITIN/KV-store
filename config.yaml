@@ -7,3 +7,5 @@ server:
 storage:
   cleanup_interval_seconds: 60
   max_memory_mb: 512
+  snapshot_file: "./data/dump.json"
+  snapshot_interval_seconds: 30
